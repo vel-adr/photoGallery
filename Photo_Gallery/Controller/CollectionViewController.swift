@@ -18,12 +18,26 @@ class CollectionViewController: UICollectionViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupObserverForNotification()
         setupData()
         setUpCollectionView()
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+    }
+    
+    private func setupObserverForNotification() {
+        let persistentContainer = photoDAO.coreDataHelper.container
+        NotificationCenter.default.addObserver(self, selector: #selector(fetchChanges), name: .NSPersistentStoreRemoteChange, object: persistentContainer?.persistentStoreCoordinator)
+    }
+    
+    @objc func fetchChanges() {
+        print("Just recieved NSPersistent notification")
+        DispatchQueue.main.async {
+            self.setupData()
+            self.collectionView.reloadData()
+        }
     }
     
     private func setupData() {
